@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import express from "express";
 import authRoutes from "./routes/authRoutes.mjs";
 import db from "./config/db.mjs";
+import adminRoutes from "./routes/adminRoutes.mjs";
+import { adminKeyAuth } from "./middlewares/adminMiddleware.mjs";
 
 dotenv.config();
 
@@ -13,6 +15,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api", authRoutes);
+app.use("/api/admin", adminKeyAuth, adminRoutes);
 
 // Check DB connection
 (async () => {

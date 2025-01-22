@@ -113,7 +113,7 @@ export const getUser = async (req, res) => {
 
     // Fetch user details from the database
     const [user] = await db.execute(
-      "SELECT id, name, email, created_at, updated_at FROM users WHERE id = ?",
+      "SELECT id, name, email, created_at, updated_at FROM users WHERE id = ? LIMIT 1",
       [userId]
     );
     if (user.length === 0) {
@@ -125,7 +125,7 @@ export const getUser = async (req, res) => {
       res,
       statusCode: 200,
       message: "Success fetching user data",
-      data: user,
+      data: user[0],
     });
   } catch (error) {
     console.error(error);
