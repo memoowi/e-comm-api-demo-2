@@ -2,3 +2,4 @@
 2025-01-23T14:53:12.270Z - GET /api/category - IP: ::ffff:192.168.1.106 - Status: 403 - Forbidden - User-Agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Mobile Safari/537.36
 2025-01-23T14:55:15.909Z - GET /api/category - IP: ::ffff:192.168.1.106 - Status: 403 - Forbidden - User-Agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Mobile Safari/537.36
 2025-01-23T14:55:50.880Z - GET /api/category - IP: ::ffff:192.168.1.106 - Status: 403 - Forbidden - User-Agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Mobile Safari/537.36
+2025-01-23T15:03:36.467Z - GET /api/category - IP: ::1 - Status: 200 - OK - User-Agent: PostmanRuntime/7.43.0
