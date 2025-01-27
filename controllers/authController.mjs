@@ -6,7 +6,6 @@ import { errorResponse, successResponse } from "../handler/responseHandler.mjs";
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
-  // VALIDATE INPUT
   if (!name || !email || !password) {
     return errorResponse({
       res,
@@ -16,7 +15,6 @@ export const register = async (req, res) => {
   }
 
   try {
-    // CHECK IF EMAIL EXIST
     const [existingUser] = await db.execute(
       "SELECT * FROM users WHERE email = ?",
       [email]
@@ -29,23 +27,19 @@ export const register = async (req, res) => {
       });
     }
 
-    // HASH THE PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // INSERT THE NEW USER
     const [result] = await db.execute(
       "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
       [name, email, hashedPassword]
     );
 
-    // CREATE JWT TOKEN
     const token = jwt.sign(
       { id: result.insertId, email },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Send the token back to the client
     successResponse({
       res,
       statusCode: 201,
@@ -59,7 +53,6 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  // VALIDATE INPUT
   if (!email || !password) {
     return errorResponse({
       res,
@@ -69,7 +62,6 @@ export const login = async (req, res) => {
   }
 
   try {
-    // CHECK IF USER EXIST
     const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
@@ -77,7 +69,6 @@ export const login = async (req, res) => {
       return errorResponse({ res, statusCode: 404, message: "User not found" });
     }
 
-    // EXISTING USER
     const user = rows[0];
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
@@ -94,7 +85,6 @@ export const login = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Respond with success
     successResponse({
       res,
       statusCode: 200,
@@ -108,10 +98,8 @@ export const login = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    // Retrieve user ID from the authenticated token
     const userId = req.user.id;
 
-    // Fetch user details from the database
     const [user] = await db.execute(
       "SELECT id, name, email, created_at, updated_at FROM users WHERE id = ? LIMIT 1",
       [userId]
@@ -120,7 +108,6 @@ export const getUser = async (req, res) => {
       return errorResponse({ res, statusCode: 404, message: "User not found" });
     }
 
-    // Respond with user details
     successResponse({
       res,
       statusCode: 200,

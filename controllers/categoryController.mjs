@@ -4,7 +4,6 @@ import { errorResponse, successResponse } from "../handler/responseHandler.mjs";
 export const addCategory = async (req, res) => {
   const { name, description } = req.body;
 
-  // VALIDATE INPUT
   if (!name || !description) {
     return errorResponse({
       res,
@@ -13,12 +12,10 @@ export const addCategory = async (req, res) => {
     });
   }
 
-  // Check if a file is uploaded
   if (!req.file) {
     return errorResponse(res, "Image file is required", 400);
   }
 
-  // CHECK IF CATEGORY EXIST
   const [existingCategory] = await db.execute(
     "SELECT * FROM categories WHERE name = ?",
     [name]
@@ -32,12 +29,8 @@ export const addCategory = async (req, res) => {
   }
 
   try {
-    // Get the image URL
-    // const baseUrl = req.protocol + "://" + req.get("host");
-    // const imgUrl = `${baseUrl}/${req.file.destination}/${req.file.filename}`;
     const imgUrl = `${req.file.destination}/${req.file.filename}`;
 
-    // INSERT THE NEW CATEGORY
     const [result] = await db.execute(
       "INSERT INTO categories (name, description, img_url) VALUES (?, ?, ?)",
       [name, description, imgUrl]

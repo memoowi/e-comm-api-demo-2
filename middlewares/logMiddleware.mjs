@@ -11,12 +11,10 @@ if (!fs.existsSync(logDirectory)) {
 const logFilePath = path.join(logDirectory, "requests.log");
 export const logStream = fs.createWriteStream(logFilePath, { flags: "a" }); // 'a' for append
 
-// Middleware to log IP addresses
 export const logMiddleware = (req, res, next) => {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   const timestamp = new Date().toISOString();
 
-  // Capture the response status code after the response is sent
   res.on("finish", () => {
     const statusCode = res.statusCode;
     const logMessage = `${timestamp} - ${req.method} ${req.originalUrl} - IP: ${ip} - Status: ${statusCode} - ${res.statusMessage} - User-Agent: ${req.headers["user-agent"]}\n`;

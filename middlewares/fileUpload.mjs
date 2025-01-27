@@ -16,7 +16,6 @@ const storage = multer.diskStorage({
     // console.log(route);
     const uploadPath = path.join('uploads', route);
 
-    // Ensure the directory exists
     createDirectory(uploadPath);
 
     cb(null, uploadPath);
