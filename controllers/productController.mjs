@@ -68,6 +68,12 @@ export const addProduct = async (req, res) => {
     const [product] = await db.execute("SELECT * FROM products WHERE id = ?", [
       result.insertId,
     ]);
+    const [category] = await db.execute(
+      "SELECT name FROM categories WHERE id = ?",
+      [categoryId]
+    );
+
+    product[0].category_name = category[0].name;
     successResponse({
       res,
       statusCode: 201,
