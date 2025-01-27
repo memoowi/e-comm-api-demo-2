@@ -13,7 +13,11 @@ export const addCategory = async (req, res) => {
   }
 
   if (!req.file) {
-    return errorResponse(res, "Image file is required", 400);
+    return errorResponse({
+      res,
+      statusCode: 400,
+      message: "Image file is required",
+    });
   }
 
   const [existingCategory] = await db.execute(
