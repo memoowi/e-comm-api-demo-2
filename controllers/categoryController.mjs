@@ -61,7 +61,9 @@ export const addCategory = async (req, res) => {
 
 export const getAllCategories = async (req, res) => {
   try {
-    const [rows] = await db.execute("SELECT name, description, img_url FROM categories");
+    const [rows] = await db.execute(
+      "SELECT name, description, img_url FROM categories"
+    );
     successResponse({
       res,
       statusCode: 200,
