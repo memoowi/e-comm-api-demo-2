@@ -23,9 +23,9 @@ app.use("/uploads", express.static("uploads"));
 app.use(express.json());
 
 // Routes with Middlewares
+app.use("/api/admin", adminKeyAuth, adminRoutes);
 app.use("/api", apiKeyAuth, publicRoutes);
 app.use("/api", apiKeyAuth, authenticate, authenticateRoutes);
-app.use("/api/admin", adminKeyAuth, adminRoutes);
 
 // Check DB connection
 (async () => {
