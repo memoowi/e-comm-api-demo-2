@@ -6,11 +6,13 @@ export const successResponse = ({
   status = "OK",
   message,
   data,
+  metadata,
 }) => {
   return res.status(statusCode).json({
     status: status,
     message: message,
     data,
+    metadata,
   });
 };
 

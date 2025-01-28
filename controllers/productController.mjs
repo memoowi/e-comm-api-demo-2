@@ -89,3 +89,82 @@ export const addProduct = async (req, res) => {
     errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
   }
 };
+
+export const getAllProducts = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "name",
+      order = "asc",
+      q = "",
+    } = req.query;
+
+    // Validate and sanitize input
+    const validSortColumns = ["name", "price", "stock", "created_at"];
+    const validOrder = ["asc", "desc"];
+
+    if (!validSortColumns.includes(sortBy)) {
+      return errorResponse({
+        res,
+        statusCode: 400,
+        message: `Invalid sortBy value. Valid values: ${validSortColumns.join(
+          ", "
+        )}`,
+      });
+    }
+
+    if (!validOrder.includes(order.toLowerCase())) {
+      return errorResponse({
+        res,
+        statusCode: 400,
+        message: `Invalid order value. Valid values: asc, desc`,
+      });
+    }
+
+    // Calculate offset for pagination
+    const offset = (page - 1) * limit;
+
+    // Prepare the search query and SQL
+    const searchQuery = `%${q}%`;
+    const baseQuery = `SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.name LIKE ? OR p.description LIKE ?`;
+    const countQuery = `SELECT COUNT(*) AS total FROM (${baseQuery}) AS filtered_products`;
+    const paginatedQuery = `${baseQuery} ORDER BY ${sortBy} ${order.toUpperCase()} LIMIT ? OFFSET ?`;
+
+    // Fetch total count for pagination metadata
+    const [totalCountResult] = await db.execute(countQuery, [
+      searchQuery,
+      searchQuery,
+    ]);
+    const totalCount = totalCountResult[0].total;
+
+    // Fetch paginated and sorted product data
+    const [rows] = await db.execute(paginatedQuery, [
+      searchQuery,
+      searchQuery,
+      parseInt(limit),
+      parseInt(offset),
+    ]);
+
+    // Respond with data and metadata
+    successResponse({
+      res,
+      statusCode: 200,
+      message: "Success fetching products data",
+      data: rows.map((product) => ({
+        ...product,
+        variant: JSON.parse(product.variant),
+        img_urls: JSON.parse(product.img_urls),
+      })),
+      metadata: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalCount / limit),
+        totalItems: totalCount,
+        itemsPerPage: parseInt(limit),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
+  }
+};
