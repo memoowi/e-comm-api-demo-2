@@ -20,7 +20,6 @@ export const addProduct = async (req, res) => {
     });
   }
 
-  // Parse variants if provided
   let parsedVariant = [];
   if (variant) {
     try {
@@ -100,7 +99,6 @@ export const getAllProducts = async (req, res) => {
       q = "",
     } = req.query;
 
-    // Validate and sanitize input
     const validSortColumns = ["name", "price", "stock", "created_at"];
     const validOrder = ["asc", "desc"];
 
@@ -122,23 +120,19 @@ export const getAllProducts = async (req, res) => {
       });
     }
 
-    // Calculate offset for pagination
     const offset = (page - 1) * limit;
 
-    // Prepare the search query and SQL
     const searchQuery = `%${q}%`;
     const baseQuery = `SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.name LIKE ? OR p.description LIKE ?`;
     const countQuery = `SELECT COUNT(*) AS total FROM (${baseQuery}) AS filtered_products`;
     const paginatedQuery = `${baseQuery} ORDER BY ${sortBy} ${order.toUpperCase()} LIMIT ? OFFSET ?`;
 
-    // Fetch total count for pagination metadata
     const [totalCountResult] = await db.execute(countQuery, [
       searchQuery,
       searchQuery,
     ]);
     const totalCount = totalCountResult[0].total;
 
-    // Fetch paginated and sorted product data
     const [rows] = await db.execute(paginatedQuery, [
       searchQuery,
       searchQuery,
@@ -146,7 +140,6 @@ export const getAllProducts = async (req, res) => {
       parseInt(offset),
     ]);
 
-    // Respond with data and metadata
     successResponse({
       res,
       statusCode: 200,
