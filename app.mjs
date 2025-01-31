@@ -7,6 +7,7 @@ import publicRoutes from "./routes/publicRoutes.mjs";
 import adminRoutes from "./routes/adminRoutes.mjs";
 import authenticateRoutes from "./routes/authenticateRoutes.mjs";
 import { logMiddleware, logStream } from "./middlewares/logMiddleware.mjs";
+import cors from "cors";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(logMiddleware);
+app.use(cors());
 
 app.use("/uploads", express.static("uploads"));
 
