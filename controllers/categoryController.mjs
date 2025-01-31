@@ -35,9 +35,10 @@ export const addCategory = async (req, res) => {
   try {
     const imgUrl = `${req.file.destination}/${req.file.filename}`;
 
+    const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, 'and').replace(/[^\w-]/g, "");
     const [result] = await db.execute(
-      "INSERT INTO categories (name, description, img_url) VALUES (?, ?, ?)",
-      [name, description, imgUrl]
+      "INSERT INTO categories (name, description, slug, img_url) VALUES (?, ?, ?, ?)",
+      [name, description, slug, imgUrl]
     );
     const newCategory = await db.execute(
       "SELECT * FROM categories WHERE id = ?",
@@ -72,3 +73,26 @@ export const getAllCategories = async (req, res) => {
     errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
   }
 };
+
+export const addSlugtoAllCategories = async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT id, name FROM categories"
+    );
+    for (const category of rows) {
+      const slug = category.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, 'and').replace(/[^\w-]/g, "");
+      await db.execute(
+        "UPDATE categories SET slug = ? WHERE id = ?",
+        [slug, category.id]
+      );
+    }
+    successResponse({
+      res,
+      statusCode: 200,
+      message: "Success adding slug to categories",
+    });
+  } catch (error) {
+    console.error(error);
+    errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
+  }
+}
