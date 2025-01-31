@@ -51,10 +51,12 @@ export const addProduct = async (req, res) => {
 
   try {
     const imgUrls = req.files.map((file) => file.path);
+    const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, 'and').replace(/[^\w-]/g, "");
     const [result] = await db.execute(
-      "INSERT INTO products (name, description, variant, price, stock, category_id, img_urls) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO products (name, slug, description, variant, price, stock, category_id, img_urls) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
         name,
+        slug,
         description,
         JSON.stringify(parsedVariant),
         price,
@@ -161,3 +163,26 @@ export const getAllProducts = async (req, res) => {
     errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
   }
 };
+
+export const addSlugintoAllProducts = async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT id, name FROM products"
+    );
+    for (const product of rows) {
+      const slug = product.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, 'and').replace(/[^\w-]/g, "");
+      await db.execute(
+        "UPDATE products SET slug = ? WHERE id = ?",
+        [slug, product.id]
+      );
+    }
+    successResponse({
+      res,
+      statusCode: 200,
+      message: "Success adding slug to products",
+    });
+  } catch (error) {
+    console.error(error);
+    errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
+  }
+}
