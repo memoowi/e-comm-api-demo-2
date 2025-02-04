@@ -12,4 +12,4 @@ router.post("/product", upload.array("images"), addProduct, uploadErrorHandler);
 router.post("/category/slug", addSlugtoAllCategories);
 router.post("/product/slug", addSlugintoAllProducts);
 
-export default router;
+export default router; 
