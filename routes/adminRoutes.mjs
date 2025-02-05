@@ -3,6 +3,7 @@ import { addCategory, addSlugtoAllCategories } from "../controllers/categoryCont
 import { upload } from "../middlewares/fileUpload.mjs";
 import { uploadErrorHandler } from "../handler/responseHandler.mjs";
 import { addProduct, addSlugintoAllProducts } from "../controllers/productController.mjs";
+import { generateFakeReviewsForAllProducts } from "../controllers/reviewController.mjs";
 
 const router = Router();
 
@@ -11,6 +12,8 @@ router.post("/product", upload.array("images"), addProduct, uploadErrorHandler);
 
 router.post("/category/slug", addSlugtoAllCategories);
 router.post("/product/slug", addSlugintoAllProducts);
+
+router.post("/review", generateFakeReviewsForAllProducts);
 
 
 
