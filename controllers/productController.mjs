@@ -177,8 +177,64 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+export const getProductDetails = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    // Get product details
+    const [product] = await db.execute(
+      `SELECT p.*, c.name AS category_name 
+       FROM products p 
+       LEFT JOIN categories c ON p.category_id = c.id 
+       WHERE p.slug = ?`, 
+      [slug]
+    );
+
+    if (product.length === 0) {
+      return errorResponse({
+        res,
+        statusCode: 404,
+        message: "Product not found",
+      });
+    }
+
+    // Parse JSON fields (if stored as JSON strings)
+    const productData = {
+      ...product[0],
+      variant: JSON.parse(product[0].variant || "[]"),
+      img_urls: JSON.parse(product[0].img_urls || "[]"),
+    };
+
+    // Fetch product reviews
+    const [reviews] = await db.execute(
+      "SELECT r.*, u.name AS user_name FROM reviews r LEFT JOIN users u ON r.user_id = u.id WHERE product_id = ? ORDER BY created_at DESC",
+      [productData.id]
+    );
+
+    // Calculate total reviews and average rating
+    const totalReviews = reviews.length;
+
+    // Add metadata
+    const response = {
+      ...productData,
+      total_reviews: totalReviews,
+      reviews,
+    };
+
+    successResponse({
+      res,
+      statusCode: 200,
+      message: "Product details fetched successfully",
+      data: response,
+    });
+  } catch (error) {
+    console.error(error);
+    errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
+  }
+};
 
 
+// ADMIN
 export const addSlugintoAllProducts = async (req, res) => {
   try {
     const [rows] = await db.execute(
