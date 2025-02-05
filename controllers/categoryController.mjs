@@ -35,7 +35,11 @@ export const addCategory = async (req, res) => {
   try {
     const imgUrl = `${req.file.destination}/${req.file.filename}`;
 
-    const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, 'and').replace(/[^\w-]/g, "");
+    const slug = name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/&/g, "and")
+      .replace(/[^\w-]/g, "");
     const [result] = await db.execute(
       "INSERT INTO categories (name, description, slug, img_url) VALUES (?, ?, ?, ?)",
       [name, description, slug, imgUrl]
@@ -76,15 +80,17 @@ export const getAllCategories = async (req, res) => {
 
 export const addSlugtoAllCategories = async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      "SELECT id, name FROM categories"
-    );
+    const [rows] = await db.execute("SELECT id, name FROM categories");
     for (const category of rows) {
-      const slug = category.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, 'and').replace(/[^\w-]/g, "");
-      await db.execute(
-        "UPDATE categories SET slug = ? WHERE id = ?",
-        [slug, category.id]
-      );
+      const slug = category.name
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/&/g, "and")
+        .replace(/[^\w-]/g, "");
+      await db.execute("UPDATE categories SET slug = ? WHERE id = ?", [
+        slug,
+        category.id,
+      ]);
     }
     successResponse({
       res,
@@ -95,4 +101,4 @@ export const addSlugtoAllCategories = async (req, res) => {
     console.error(error);
     errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
   }
-}
+};
