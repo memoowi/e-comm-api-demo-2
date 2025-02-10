@@ -9,6 +9,7 @@ router.post("/register", register);
 router.post("/login", login);
 
 router.get("/category", getAllCategories);
+
 router.get("/product", getAllProducts);
 router.get("/product/:slug", getProductDetails);
 

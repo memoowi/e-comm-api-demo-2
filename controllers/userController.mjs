@@ -136,6 +136,18 @@ export const updateProfilePhoto = async (req, res) => {
   try {
     const imgUrl = `${req.file.destination}/${req.file.filename}`;
 
+    const [existingUser] = await db.execute(
+      "SELECT * FROM users WHERE id = ?",
+      [userId]
+    );
+    if (existingUser.length === 0) {
+      return errorResponse({
+        res,
+        statusCode: 404,
+        message: "User not found",
+      });
+    }
+
     const [result] = await db.execute(
       "UPDATE users SET profile_photo = ? WHERE id = ?",
       [imgUrl, userId]

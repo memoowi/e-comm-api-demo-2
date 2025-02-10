@@ -13,10 +13,13 @@ router.get("/user", getUser);
 router.patch("/user", updateNameEmail);
 router.patch("/user/password", updatePassword);
 router.post("/user/profile-photo", upload.single("photo"), updateProfilePhoto, uploadErrorHandler);
+
 router.post("/review", addReview);
+
 router.post("/cart", addCart);
 router.get("/cart", getCart);
 router.delete("/cart", deleteCart);
+
 router.post("/address", addAddress);
 router.get("/address", getAddresses);
 router.delete("/address", deleteAddress);

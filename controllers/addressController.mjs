@@ -46,7 +46,7 @@ export const addAddress = async (req, res) => {
 
     successResponse({
       res,
-      statusCode: 200,
+      statusCode: 201,
       message: "Address added successfully",
       //   data: result,
     });
