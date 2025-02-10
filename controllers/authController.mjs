@@ -80,7 +80,7 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name },
+      { id: user.id, email: user.email, name: user.name, profile_photo: user.profile_photo },
       process.env.JWT_SECRET,
       { expiresIn: "8h" }
     );
@@ -109,7 +109,7 @@ export const getUser = async (req, res) => {
     const userId = req.user.id;
 
     const [user] = await db.execute(
-      "SELECT id, name, email, created_at, updated_at FROM users WHERE id = ? LIMIT 1",
+      "SELECT id, name, email, profile_photo, created_at, updated_at FROM users WHERE id = ? LIMIT 1",
       [userId]
     );
     if (user.length === 0) {
