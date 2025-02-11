@@ -3,7 +3,7 @@ import { errorResponse, successResponse } from "../handler/responseHandler.mjs";
 
 export const addCart = async (req, res) => {
   const userId = req.user.id;
-  const { productId, quantity } = req.body;
+  const { productId, quantity, variant } = req.body;
 
   if (!productId || !quantity) {
     return errorResponse({
@@ -47,9 +47,10 @@ export const addCart = async (req, res) => {
       return;
     }
 
+    // TODO: Add check if variant exists
     const [result] = await db.execute(
-      "INSERT INTO carts (user_id, product_id, quantity) VALUES (?, ?, ?)",
-      [userId, productId, quantity]
+      "INSERT INTO carts (user_id, product_id, variant, quantity) VALUES (?, ?, ?)",
+      [userId, productId, variant, quantity]
     );
 
     successResponse({
@@ -73,7 +74,7 @@ export const getCart = async (req, res) => {
 
   try {
     const [rows] = await db.execute(
-      "SELECT p.*, c.quantity FROM products p LEFT JOIN carts c ON p.id = c.product_id WHERE c.user_id = ?",
+      "SELECT p.*, c.quantity, c.variant FROM products p LEFT JOIN carts c ON p.id = c.product_id WHERE c.user_id = ?",
       [userId]
     );
 
