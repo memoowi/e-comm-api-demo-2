@@ -64,7 +64,7 @@ export const addCategory = async (req, res) => {
 export const getAllCategories = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      "SELECT name, description, img_url FROM categories"
+      "SELECT * FROM categories"
     );
     successResponse({
       res,
