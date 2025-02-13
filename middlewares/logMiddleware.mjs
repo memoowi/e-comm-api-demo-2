@@ -23,19 +23,19 @@ export const logMiddleware = (req, res, next) => {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   const timestamp = new Date().toISOString();
 
+  const blockedList = blockedIps;
+  
   res.on("finish", () => {
     const statusCode = res.statusCode;
     const logMessage = `${timestamp} - ${req.method} ${req.originalUrl} - IP: ${ip} - Status: ${statusCode} - ${res.statusMessage} - User-Agent: ${req.headers["user-agent"]} - Query: ${JSON.stringify(req.query)} - Body: ${JSON.stringify(req.body)}\n`;
     console.log(logMessage);
     logStream.write(logMessage);
   });
-
-  const blockedList = blockedIps;
-
   if (blockedList.includes(ip)) {
+    // console.log(`IP ${ip} is blocked`);
     return errorResponse({ res, statusCode: 403, message: "IP is blocked" });
   }
-
+  
   limiter(req, res, next);
 
 };

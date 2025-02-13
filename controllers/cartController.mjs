@@ -81,7 +81,11 @@ export const getCart = async (req, res) => {
       res,
       statusCode: 200,
       message: "Success fetching cart data",
-      data: rows,
+      data: rows.map((item) => ({
+        ...item,
+        variant: JSON.parse(item.variant),
+        img_urls: JSON.parse(item.img_urls),
+      }))
     });
   } catch (error) {
     console.error(error);
