@@ -33,7 +33,7 @@ export const addCategory = async (req, res) => {
   }
 
   try {
-    const imgUrl = `${req.file.destination}/${req.file.filename}`;
+    const imgUrl = `${req.file.destination}/${req.file.filename}`.replaceAll('\\', '/');
 
     const slug = name
       .toLowerCase()
@@ -96,6 +96,36 @@ export const addSlugtoAllCategories = async (req, res) => {
       res,
       statusCode: 200,
       message: "Success adding slug to categories",
+    });
+  } catch (error) {
+    console.error(error);
+    errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
+  }
+};
+
+export const fixAllCategoryImages = async (req, res) => {
+  try {
+    const [categories] = await db.execute("SELECT id, img_url FROM categories");
+
+    for (const category of categories) {
+      if (category.img_url) {
+        try {
+          const imgUrl = category.img_url.replaceAll("\\", "/");
+          await db.execute("UPDATE categories SET img_url = ? WHERE id = ?", [
+            imgUrl,
+            category.id,
+          ]);
+          console.log(`Updated category ${category.id}`);
+        } catch (error) {
+          console.error(`Error updating category ${category.id}:`, error);
+        }
+      }
+    }
+
+    successResponse({
+      res,
+      statusCode: 200,
+      message: "Success fixing category images",
     });
   } catch (error) {
     console.error(error);

@@ -134,7 +134,8 @@ export const updateProfilePhoto = async (req, res) => {
   }
 
   try {
-    const imgUrl = `${req.file.destination}/${req.file.filename}`;
+    console.log(req.file.destination);
+    const imgUrl = `${req.file.destination}/${req.file.filename}`.replaceAll('\\', '/');
 
     const [existingUser] = await db.execute(
       "SELECT * FROM users WHERE id = ?",

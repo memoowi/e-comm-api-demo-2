@@ -50,7 +50,7 @@ export const addProduct = async (req, res) => {
   }
 
   try {
-    const imgUrls = req.files.map((file) => file.path);
+    const imgUrls = req.files.map((file) => file.path.replaceAll("\\", "/"));
     const slug = name
       .toLowerCase()
       .replace(/\s+/g, "-")
@@ -266,5 +266,47 @@ export const addSlugintoAllProducts = async (req, res) => {
   } catch (error) {
     console.error(error);
     errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
+  }
+};
+
+export const fixAllProductImages = async (req, res) => {
+  try {
+    const [products] = await db.execute("SELECT id, img_urls FROM products");
+
+    for (const product of products) {
+      if (product.img_urls) {
+        try {
+          const imgUrls = JSON.parse(product.img_urls);
+          const updatedImgUrls = imgUrls.map((url) =>
+            url.replaceAll("\\", "/")
+          );
+
+          await db.execute("UPDATE products SET img_urls = ? WHERE id = ?", [
+            JSON.stringify(updatedImgUrls),
+            product.id,
+          ]);
+
+          console.log(`Updated product ${product.id}`);
+        } catch (parseError) {
+          console.error(
+            `Error parsing img_urls for product ${product.id}:`,
+            parseError
+          );
+        }
+      }
+    }
+
+    successResponse({
+      res,
+      statusCode: 200,
+      message: "All product image URLs updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating all product image URLs:", error);
+    errorResponse({
+      res,
+      statusCode: 500,
+      message: "Internal Server Error",
+    });
   }
 };
