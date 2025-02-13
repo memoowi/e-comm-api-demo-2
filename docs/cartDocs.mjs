@@ -58,6 +58,7 @@ export default {
               required: ["productId", "quantity"],
               properties: {
                 productId: { type: "number", example: 1 },
+                variant: { type: "string", example: "Variant 1" },
                 quantity: { type: "number", example: 1 },
               },
             },
@@ -100,9 +101,9 @@ export default {
           "application/json": {
             schema: {
               type: "object",
-              required: ["productId"],
+              required: ["cartId"],
               properties: {
-                productId: { type: "number", example: 1 },
+                cartId: { type: "number", example: 1 },
               },
             },
           },

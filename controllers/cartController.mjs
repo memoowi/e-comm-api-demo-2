@@ -3,7 +3,7 @@ import { errorResponse, successResponse } from "../handler/responseHandler.mjs";
 
 export const addCart = async (req, res) => {
   const userId = req.user.id;
-  const { productId, quantity } = req.body;
+  const { productId, variant = null, quantity } = req.body;
 
   if (!productId || !quantity) {
     return errorResponse({
@@ -25,32 +25,62 @@ export const addCart = async (req, res) => {
         message: "Product not found",
       });
     }
+    // check if variant is valid
+    const variantData = JSON.parse(product[0].variant);
 
-    const [cart] = await db.execute(
-      "SELECT * FROM carts WHERE user_id = ? AND product_id = ?",
-      [userId, productId]
-    );
-
-    if (cart.length > 0) {
-      // Update the quantity of the existing cart item
-      const [result] = await db.execute(
-        "UPDATE carts SET quantity = ? WHERE user_id = ? AND product_id = ?",
-        [quantity, userId, productId]
-      );
-
-      successResponse({
-        res,
-        statusCode: 200,
-        message: "Product quantity updated in cart successfully",
-        // data: result,
-      });
-      return;
+    // check if product has variants, if so make variant field required and check if variant is valid
+    if (variantData.length > 0) {
+      if (!variant) {
+        return errorResponse({
+          res,
+          statusCode: 400,
+          message: "variant is required",
+        });
+      }
+      if (!variantData.includes(variant)) {
+        return errorResponse({
+          res,
+          statusCode: 400,
+          message: "Invalid variant",
+        });
+      }
     }
 
-    // TODO: Add check if variant exists
+    let cart = [];
+    if (variant) {
+      [cart] = await db.execute(
+        "SELECT * FROM carts WHERE user_id = ? AND product_id = ? AND variant = ?",
+        [userId, productId, variant]
+      );
+    } else {
+      [cart] = await db.execute(
+        "SELECT * FROM carts WHERE user_id = ? AND product_id = ?",
+        [userId, productId]
+      );
+    }
+
+    console.log(cart);
+
+    if (cart.length > 0) {
+      // update quantity based on variant
+      if (cart[0].variant === variant) {
+        const [result] = await db.execute(
+          "UPDATE carts SET quantity = ? WHERE id = ? ",
+          [quantity, cart[0].id]
+        );
+        successResponse({
+          res,
+          statusCode: 200,
+          message: "Product quantity updated in cart successfully",
+          // data: result,
+        });
+        return;
+      }
+    }
+
     const [result] = await db.execute(
-      "INSERT INTO carts (user_id, product_id, quantity) VALUES (?, ?, ?)",
-      [userId, productId, quantity]
+      "INSERT INTO carts (user_id, product_id, variant, quantity) VALUES (?, ?, ?, ?)",
+      [userId, productId, variant, quantity]
     );
 
     successResponse({
@@ -74,7 +104,7 @@ export const getCart = async (req, res) => {
 
   try {
     const [rows] = await db.execute(
-      "SELECT p.*, c.quantity, c.variant FROM products p LEFT JOIN carts c ON p.id = c.product_id WHERE c.user_id = ?",
+      "SELECT p.*, c.id as cart_id, c.quantity, c.variant FROM products p LEFT JOIN carts c ON p.id = c.product_id WHERE c.user_id = ?",
       [userId]
     );
 
@@ -84,9 +114,9 @@ export const getCart = async (req, res) => {
       message: "Success fetching cart data",
       data: rows.map((item) => ({
         ...item,
-        variant: JSON.parse(item.variant),
+        // variant: JSON.parse(item.variant),
         img_urls: JSON.parse(item.img_urls),
-      }))
+      })),
     });
   } catch (error) {
     console.error(error);
@@ -100,13 +130,21 @@ export const getCart = async (req, res) => {
 
 export const deleteCart = async (req, res) => {
   const userId = req.user.id;
-  const { productId } = req.body;
+  const { cartId } = req.body;
 
   try {
     const [result] = await db.execute(
-      "DELETE FROM carts WHERE user_id = ? AND product_id = ?",
-      [userId, productId]
+      "DELETE FROM carts WHERE user_id = ? AND id = ?",
+      [userId, cartId]
     );
+
+    if (result.affectedRows === 0) {
+      return errorResponse({
+        res,
+        statusCode: 404,
+        message: "Cart not found",
+      });
+    }
 
     successResponse({
       res,
