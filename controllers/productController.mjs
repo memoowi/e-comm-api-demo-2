@@ -51,7 +51,11 @@ export const addProduct = async (req, res) => {
 
   try {
     const imgUrls = req.files.map((file) => file.path);
-    const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, 'and').replace(/[^\w-]/g, "");
+    const slug = name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/&/g, "and")
+      .replace(/[^\w-]/g, "");
     const [result] = await db.execute(
       "INSERT INTO products (name, slug, description, variant, price, stock, category_id, img_urls) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
@@ -127,7 +131,7 @@ export const getAllProducts = async (req, res) => {
     const searchQuery = `%${q}%`;
 
     let baseQuery = `
-      SELECT p.*, c.name AS category_name 
+      SELECT p.*, c.name AS category_name, c.slug AS category_slug
       FROM products p 
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE (p.name LIKE ? OR p.description LIKE ?)`;
@@ -147,12 +151,18 @@ export const getAllProducts = async (req, res) => {
 
     queryParams.push(parseInt(limit), parseInt(offset));
 
-    const [totalCountResult] = await db.execute(countQuery, queryParams.slice(0, -2));
+    const [totalCountResult] = await db.execute(
+      countQuery,
+      queryParams.slice(0, -2)
+    );
     const totalCount = totalCountResult[0].total;
 
     const [rows] = await db.execute(paginatedQuery, queryParams);
 
-    const [categoryData] = await db.execute(`SELECT * FROM categories WHERE slug = ?`, [category]);
+    const [categoryData] = await db.execute(
+      `SELECT * FROM categories WHERE slug = ?`,
+      [category]
+    );
 
     successResponse({
       res,
@@ -183,10 +193,10 @@ export const getProductDetails = async (req, res) => {
 
     // Get product details
     const [product] = await db.execute(
-      `SELECT p.*, c.name AS category_name 
+      `SELECT p.*, c.name AS category_name, c.slug AS category_slug
        FROM products p 
        LEFT JOIN categories c ON p.category_id = c.id 
-       WHERE p.slug = ?`, 
+       WHERE p.slug = ?`,
       [slug]
     );
 
@@ -233,19 +243,20 @@ export const getProductDetails = async (req, res) => {
   }
 };
 
-
 // ADMIN
 export const addSlugintoAllProducts = async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      "SELECT id, name FROM products"
-    );
+    const [rows] = await db.execute("SELECT id, name FROM products");
     for (const product of rows) {
-      const slug = product.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, 'and').replace(/[^\w-]/g, "");
-      await db.execute(
-        "UPDATE products SET slug = ? WHERE id = ?",
-        [slug, product.id]
-      );
+      const slug = product.name
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/&/g, "and")
+        .replace(/[^\w-]/g, "");
+      await db.execute("UPDATE products SET slug = ? WHERE id = ?", [
+        slug,
+        product.id,
+      ]);
     }
     successResponse({
       res,
@@ -256,4 +267,4 @@ export const addSlugintoAllProducts = async (req, res) => {
     console.error(error);
     errorResponse({ res, statusCode: 500, message: "Internal Server Error" });
   }
-}
+};
