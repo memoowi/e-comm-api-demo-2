@@ -7,6 +7,7 @@ import addressDocs from "./addressDocs.mjs";
 import categoryDocs from "./categoryDocs.mjs";
 import productDocs from "./productDocs.mjs";
 import adminDocs from "./adminDocs.mjs";
+import orderDocs from "./orderDocs.mjs";
 
 const swaggerOptions = {
   definition: {
@@ -56,6 +57,10 @@ const swaggerOptions = {
         name: "Address",
         description: "Address routes",
       },
+      {
+        name: "Order",
+        description: "Order routes",
+      },
     ],
     paths: {
       ...authDocs,
@@ -66,6 +71,7 @@ const swaggerOptions = {
       ...categoryDocs,
       ...productDocs,
       ...adminDocs,
+      ...orderDocs
     },
   },
   apis: ["./routes/*.mjs"],
