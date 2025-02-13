@@ -47,6 +47,7 @@ export const addCart = async (req, res) => {
       return;
     }
 
+    // TODO: Add check if variant exists
     const [result] = await db.execute(
       "INSERT INTO carts (user_id, product_id, quantity) VALUES (?, ?, ?)",
       [userId, productId, quantity]
@@ -73,7 +74,7 @@ export const getCart = async (req, res) => {
 
   try {
     const [rows] = await db.execute(
-      "SELECT p.*, c.quantity FROM products p LEFT JOIN carts c ON p.id = c.product_id WHERE c.user_id = ?",
+      "SELECT p.*, c.quantity, c.variant FROM products p LEFT JOIN carts c ON p.id = c.product_id WHERE c.user_id = ?",
       [userId]
     );
 
